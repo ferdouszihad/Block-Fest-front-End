@@ -1,8 +1,14 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Members from "./Members";
 
 const Form = () => {
   const [members, setMembers] = useState([]);
+
+  useEffect(() => {
+    fetch("http://localhost:5000/members")
+      .then((res) => res.json())
+      .then((data) => setMembers(data));
+  }, []);
 
   const hadleSubmit = (e) => {
     e.preventDefault();
@@ -12,7 +18,22 @@ const Form = () => {
       name: form.name.value,
       email: form.email.value,
     };
-    setMembers([...members, newMember]);
+
+    fetch("http://localhost:5000/addNew", {
+      method: "post",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(newMember),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data);
+        console.log(newMember);
+        setMembers([...members, newMember]);
+        form.reset();
+      })
+      .catch((err) => console.log(err));
   };
 
   return (
@@ -20,9 +41,14 @@ const Form = () => {
       <form onSubmit={hadleSubmit}>
         <fieldset>
           <legend> Insert Your Entry Now</legend>
-          <input type="text" name="name" placeholder="Full Name" />{" "}
-          <input type="email" name="email" placeholder="Email Id" /> <br />{" "}
-          <br />
+          <input
+            type="text"
+            name="name"
+            placeholder="Full Name"
+            required
+          />{" "}
+          <input type="email" name="email" placeholder="Email Id" required />{" "}
+          <br /> <br />
           <button type="submit">Submit info</button>
         </fieldset>
       </form>
